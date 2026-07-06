@@ -70,6 +70,39 @@
           title="coffee shop" />
       </div>
     </section>
+    <section class="cafe-finder container">
+  <h2>Find cafés near you</h2>
+
+  <p class="cafe-finder-intro">
+    Use your location to find nearby cafés, or search by café name, suburb, or city.
+  </p>
+
+  <div class="cafe-controls">
+    <button id="useLocationBtn" type="button">
+      Use my location
+    </button>
+
+    <input
+      id="cafeSearchInput"
+      type="text"
+      placeholder="Search café, suburb, or city"
+      aria-label="Search café by name or location"
+    />
+
+    <select id="ratingFilter" aria-label="Filter cafés by rating">
+      <option value="0">Any rating</option>
+      <option value="3">3+ stars</option>
+      <option value="4">4+ stars</option>
+      <option value="4.5">4.5+ stars</option>
+    </select>
+  </div>
+
+  <p id="cafeStatus" class="cafe-status">
+    Showing all cafés. Use your location to sort by nearest.
+  </p>
+
+  <div id="cafeResults" class="cafe-results"></div>
+</section>
     <!-- footer section -->
     <footer class="footer">
       <div class="grid-container">

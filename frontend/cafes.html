@@ -7,66 +7,98 @@
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <title>CoffeeBreak - Cafes</title>
+
     <style>
-        #map {
-            height: 600px;
-            width: 100%;
-            float: left;
-            margin-bottom: 5%;
-        }
         .cafe-details {
             margin-bottom: 20px;
-            padding: 10px;
+            padding: 15px;
             border: 1px solid #ddd;
             background-color: #fff;
+            color: rgb(78, 70, 70);
+            border-radius: 10px;
         }
+
         .cafe-details h3 {
             margin-top: 0;
+            color: green;
         }
+
         .form-error {
             color: red;
             display: none;
         }
+
         #cafe-count {
             font-size: 20px;
             margin-bottom: 10px;
             color: aliceblue;
         }
-        .filter-container {
-            margin-bottom: 10px;
-            font-size: 18px;
-            color: aliceblue;
-        }
+
+        .filter-container,
         .search-container {
             margin-bottom: 10px;
             font-size: 18px;
             color: aliceblue;
         }
+
         .search-container input {
             width: calc(90% - 120px);
             padding: 8px;
             margin-right: 10px;
         }
-        .search-container button {
+
+        .search-container button,
+        .filter-container select {
             padding: 8px 16px;
         }
-        .review-container {
-            margin-top: 20px;
+
+        .cafe-status {
+            color: aliceblue;
+            font-size: 16px;
+            margin: 15px 0;
         }
-        .review-form {
-            margin-top: 20px;
-            display: none;
+
+        .cafe-results {
+            max-width: 1000px;
+            margin: 20px auto 60px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
         }
-        .review-form textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
+
+        .cafe-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
         }
-        .review-form button {
-            padding: 10px 20px;
+
+        .cafe-tags span {
+            background-color: #ffe8d6;
+            color: rgb(78, 70, 70);
+            border-radius: 999px;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        .cafe-rating,
+        .cafe-distance {
+            font-weight: bold;
+        }
+
+        @media screen and (max-width: 768px) {
+            .search-container input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .search-container button {
+                margin-bottom: 8px;
+            }
         }
     </style>
 </head>
+
 <body>
     <header class="header">
         <div class="container row">
@@ -74,12 +106,14 @@
                 <div class="logo">
                     <h4>Coffee Break</h4>
                 </div>
+
                 <ul class="nav-links">
                     <li><a class="nav-item" href="./homepage.html">Home</a></li>
                     <li><a class="nav-item" href="./about.html">About</a></li>
-                    <li><a class="nav-item" href="#">Cafes</a></li>
+                    <li><a class="nav-item active" href="./cafes.html">Cafes</a></li>
                     <li><a class="nav-item" href="./gallery.html">Gallery</a></li>
                 </ul>
+
                 <div class="burger">
                     <div class="line1"></div>
                     <div class="line2"></div>
@@ -88,87 +122,148 @@
             </nav>
         </div>
     </header>
+
     <section class="hero">
         <div class="container row mobile">
             <h1 class="main-title">Cafes</h1>
             <p class="main-sub-title">Whakapā mai</p>
+
             <div class="cafe-location">
-                <div id="cafe-count">Total Cafes Found: <span id="cafe-count-number">0</span></div>
+                <div id="cafe-count">
+                    Total Cafes Found: <span id="cafe-count-number">0</span>
+                </div>
+
                 <div class="filter-container">
-                    <label for="rating-filter">Filter by Rating: </label>
+                    <label for="rating-filter">Filter by Rating:</label>
                     <select id="rating-filter">
                         <option value="0">All Ratings</option>
                         <option value="1">1 Star and Up</option>
                         <option value="2">2 Stars and Up</option>
                         <option value="3">3 Stars and Up</option>
                         <option value="4">4 Stars and Up</option>
-                        <option value="5">5 Stars</option>
+                        <option value="4.5">4.5 Stars and Up</option>
                     </select>
                 </div>
+
                 <div class="search-container">
-                    <input type="text" id="cafe-search" placeholder="Search for a cafe by name...">
-                    <button id="search-button">Search</button>
-                    <button id="locate-button">Locate Me</button>
+                    <input
+                        type="text"
+                        id="cafe-search"
+                        placeholder="Search for a cafe by name, suburb, or tag..."
+                    />
+                    <button id="search-button" type="button">Search</button>
+                    <button id="locate-button" type="button">Locate Me</button>
                 </div>
-                <div id="map"></div>
-                <div id="sidebar"></div>
+
+                <p id="cafe-status" class="cafe-status">
+                    Showing all cafés. Click Locate Me to sort by nearest.
+                </p>
+
+                <div id="cafe-results" class="cafe-results"></div>
             </div>
         </div>
     </section>
+
     <section class="form-container mobile">
         <h1>CONTACT US</h1>
         <p>Please drop us a line if you have any questions or suggestions</p>
+
         <form class="form" id="contact-form">
             <div class="form-row">
                 <div class="form-column">
                     <label for="name">Name</label>
-                    <input type="text" id="name" placeholder="Your name here" autocomplete="name" required />
+                    <input
+                        type="text"
+                        id="name"
+                        placeholder="Your name here"
+                        autocomplete="name"
+                        required
+                    />
                 </div>
+
                 <div class="form-column">
                     <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="Your email here" autocomplete="email" required />
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="Your email here"
+                        autocomplete="email"
+                        required
+                    />
                 </div>
             </div>
+
             <div class="form-row">
                 <div class="form-column">
                     <label for="subject">Subject</label>
-                    <input type="text" id="subject" placeholder="Your subject here" required />
+                    <input
+                        type="text"
+                        id="subject"
+                        placeholder="Your subject here"
+                        required
+                    />
                 </div>
+
                 <div class="form-column">
                     <label for="contact">Contact Number</label>
-                    <input type="tel" id="contact" placeholder="Your phone number here" pattern="^\d{10}$" required />
+                    <input
+                        type="tel"
+                        id="contact"
+                        placeholder="Your phone number here"
+                        pattern="^\d{10}$"
+                        required
+                    />
                 </div>
             </div>
+
             <div class="form-row">
                 <div class="form-column">
                     <label for="issue">Describe your issue</label>
-                    <textarea id="issue" placeholder="Describe your issue in detail here" rows="3" required></textarea>
+                    <textarea
+                        id="issue"
+                        placeholder="Describe your issue in detail here"
+                        rows="3"
+                        required
+                    ></textarea>
                 </div>
             </div>
+
             <button type="submit">Submit</button>
-            <p class="form-error" id="form-error">Please fill out all fields correctly.</p>
+            <p class="form-error" id="form-error">
+                Please fill out all fields correctly.
+            </p>
         </form>
     </section>
+
     <footer class="footer">
         <div class="grid-container">
             <div class="col-1">
                 <h3 class="footer-title">LINKS</h3>
-                <a href="./index.html">Home</a>
-                <a href="#">Contact Us</a>
+                <a href="./homepage.html">Home</a>
+                <a href="./cafes.html">Contact Us</a>
                 <a href="./menu.html">Menu</a>
                 <a href="./gallery.html">Gallery</a>
             </div>
+
             <div class="col-2">
                 <h3 class="footer-title">FOLLOW US</h3>
                 <div class="social-media">
-                    <a href="https://www.facebook.com" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-                    <a href="https://www.instagram.com" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="https://www.twitter.com" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="https://www.facebook.com" target="_blank">
+                        <i class="fa-brands fa-facebook"></i>
+                    </a>
+                    <a href="https://www.instagram.com" target="_blank">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+                    <a href="https://www.twitter.com" target="_blank">
+                        <i class="fa-brands fa-x-twitter"></i>
+                    </a>
+
                     <div class="motto">
                         <p>Whāngaihia to tinana ki te kai organic</p>
                     </div>
                 </div>
             </div>
+
             <div class="col-3">
                 <h3 class="footer-title">CONTACT US</h3>
                 <p>97 Western Hills Drive,</p>
@@ -179,262 +274,223 @@
                 <p>Email: <a id="email-add" href="#">admin@coffeebreak.co.nz</a></p>
             </div>
         </div>
+
         <div class="copyRight">
             <p>
                 <span>Copyright &#169; 2023 </span>CoffeeBreak Limited<span> All rights reserved.</span>
             </p>
         </div>
     </footer>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCaB_F1vp6UKCdHsrLASRaOWoSzOApyL2s&libraries=places,directions"></script>
+
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const whangareiLat = -35.7251;
-            const whangareiLng = 174.3237;
-            const map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: whangareiLat, lng: whangareiLng },
-                zoom: 13
-            });
+        document.addEventListener("DOMContentLoaded", function () {
+            const cafeResults = document.getElementById("cafe-results");
+            const cafeStatus = document.getElementById("cafe-status");
+            const cafeCountNumber = document.getElementById("cafe-count-number");
+            const ratingFilter = document.getElementById("rating-filter");
+            const searchInput = document.getElementById("cafe-search");
+            const searchButton = document.getElementById("search-button");
+            const locateButton = document.getElementById("locate-button");
+            const contactForm = document.getElementById("contact-form");
+            const formError = document.getElementById("form-error");
 
-            const infoWindow = new google.maps.InfoWindow();
-            const service = new google.maps.places.PlacesService(map);
-            const directionsService = new google.maps.DirectionsService();
-            const directionsRenderer = new google.maps.DirectionsRenderer();
-            directionsRenderer.setMap(map);
+            let cafes = [];
+            let userLocation = null;
 
-            let markers = [];
-            let cafeCount = 0;
-            let highestRatedPlace = null;
-            let highestRating = 0;
+            function degreesToRadians(degrees) {
+                return degrees * (Math.PI / 180);
+            }
 
-            function createMarker(place) {
-                if (!place.geometry || !place.geometry.location) return;
+            function calculateDistanceKm(userLat, userLng, cafeLat, cafeLng) {
+                const earthRadiusKm = 6371;
 
-                const marker = new google.maps.Marker({
-                    map: map,
-                    position: place.geometry.location,
-                    place: {
-                        placeId: place.place_id,
-                        location: place.geometry.location
+                const latDifference = degreesToRadians(cafeLat - userLat);
+                const lngDifference = degreesToRadians(cafeLng - userLng);
+
+                const a =
+                    Math.sin(latDifference / 2) * Math.sin(latDifference / 2) +
+                    Math.cos(degreesToRadians(userLat)) *
+                        Math.cos(degreesToRadians(cafeLat)) *
+                        Math.sin(lngDifference / 2) *
+                        Math.sin(lngDifference / 2);
+
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+                return earthRadiusKm * c;
+            }
+
+            async function loadCafes() {
+                try {
+                    const response = await fetch("./data/cafes.json");
+
+                    if (!response.ok) {
+                        throw new Error("Could not load cafe data.");
                     }
-                });
 
-                markers.push(marker);
+                    cafes = await response.json();
+                    updateCafeResults();
+                } catch (error) {
+                    cafeStatus.textContent =
+                        "Cafe data could not be loaded. Check that frontend/data/cafes.json exists.";
+                    console.error(error);
+                }
+            }
 
-                google.maps.event.addListener(marker, 'click', () => {
-                    infoWindow.setContent(`
-                        <div>
-                            <strong>${place.name}</strong><br>
-                            Rating: ${place.rating || 'N/A'}<br>
-                            ${place.vicinity || ''}
-                            <br><button onclick="getDirections(${place.geometry.location.lat()}, ${place.geometry.location.lng()})">Get Directions</button>
-                            <br><button onclick="toggleReviewForm('${place.place_id}')">Leave a Review</button>
-                            <div class="review-form" id="review-form-${place.place_id}">
-                                <textarea id="review-text-${place.place_id}" placeholder="Write your review here..."></textarea>
-                                <button onclick="submitReview('${place.place_id}', '${place.name}')">Submit Review</button>
-                            </div>
-                            <div class="review-container" id="review-container-${place.place_id}">
-                                <h4>Reviews:</h4>
-                                <div id="reviews-${place.place_id}"></div>
-                            </div>
-                        </div>
-                    `);
-                    infoWindow.open(map, marker);
-                });
-
-                if (place.rating && place.rating > highestRating) {
-                    highestRating = place.rating;
-                    highestRatedPlace = place;
+            function getCafesWithDistance(cafesToCheck) {
+                if (!userLocation) {
+                    return cafesToCheck;
                 }
 
-                cafeCount++;
-                document.getElementById('cafe-count-number').textContent = cafeCount;
+                return cafesToCheck
+                    .map(function (cafe) {
+                        return {
+                            ...cafe,
+                            distance: calculateDistanceKm(
+                                userLocation.latitude,
+                                userLocation.longitude,
+                                cafe.latitude,
+                                cafe.longitude
+                            ),
+                        };
+                    })
+                    .sort(function (a, b) {
+                        return a.distance - b.distance;
+                    });
             }
 
-            function toggleReviewForm(placeId) {
-                const form = document.getElementById(`review-form-${placeId}`);
-                form.style.display = form.style.display === 'block' ? 'none' : 'block';
+            function getFilteredCafes() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const minimumRating = Number(ratingFilter.value);
+
+                const filteredCafes = cafes.filter(function (cafe) {
+                    const searchableText = `
+                        ${cafe.name}
+                        ${cafe.address}
+                        ${cafe.tags.join(" ")}
+                    `.toLowerCase();
+
+                    const matchesSearch = searchableText.includes(searchTerm);
+                    const matchesRating = cafe.rating >= minimumRating;
+
+                    return matchesSearch && matchesRating;
+                });
+
+                return getCafesWithDistance(filteredCafes);
             }
 
-            function submitReview(placeId, name) {
-                const reviewText = document.getElementById(`review-text-${placeId}`).value;
-                if (reviewText.trim() === '') {
-                    alert('Please write a review before submitting.');
+            function renderCafes(cafesToRender) {
+                cafeResults.innerHTML = "";
+                cafeCountNumber.textContent = cafesToRender.length;
+
+                if (cafesToRender.length === 0) {
+                    cafeResults.innerHTML = `
+                        <article class="cafe-details">
+                            <h3>No cafés found</h3>
+                            <p>Try a different search or lower the rating filter.</p>
+                        </article>
+                    `;
                     return;
                 }
-                const reviewContainer = document.getElementById(`reviews-${placeId}`);
-                const reviewDiv = document.createElement('div');
-                reviewDiv.classList.add('user-review');
-                reviewDiv.innerHTML = `
-                    <strong>User:</strong><br>
-                    <p>${reviewText}</p>
-                    <hr>
-                `;
-                reviewContainer.appendChild(reviewDiv);
-                document.getElementById(`review-form-${placeId}`).style.display = 'none';
-                document.getElementById(`review-text-${placeId}`).value = '';
-                alert('Review submitted successfully!');
-            }
 
-            function fetchPlaces(lat, lng, keyword, minRating = 0) {
-                const request = {
-                    location: new google.maps.LatLng(lat, lng),
-                    radius: '5000',
-                    keyword: keyword
-                };
+                cafesToRender.forEach(function (cafe) {
+                    const cafeCard = document.createElement("article");
+                    cafeCard.className = "cafe-details";
 
-                service.nearbySearch(request, (results, status) => {
-                    if (status === google.maps.places.PlacesServiceStatus.OK) {
-                        results.forEach((place) => {
-                            if (!place.types.includes('supermarket') && place.name !== 'Coffee News (NZ)' && (!place.rating || place.rating >= minRating)) {
-                                createMarker(place);
-                            }
-                        });
+                    const distanceText =
+                        typeof cafe.distance === "number"
+                            ? `<p class="cafe-distance">${cafe.distance.toFixed(1)} km away</p>`
+                            : "";
 
-                        if (highestRatedPlace) {
-                            const highestRatedMarker = new google.maps.Marker({
-                                position: highestRatedPlace.geometry.location,
-                                map: map,
-                                icon: {
-                                    url: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'
-                                }
-                            });
+                    const priceText = cafe.coffeePrice
+    ? `Flat white from NZ$${cafe.coffeePrice.toFixed(2)}`
+    : "Coffee price not verified";
 
-                            google.maps.event.addListener(highestRatedMarker, 'click', () => {
-                                infoWindow.setContent(`
-                                    <div>
-                                        <strong>${highestRatedPlace.name}</strong><br>
-                                        Rating: ${highestRatedPlace.rating || 'N/A'}<br>
-                                        ${highestRatedPlace.vicinity || ''}
-                                        <br><button onclick="getDirections(${highestRatedPlace.geometry.location.lat()}, ${highestRatedPlace.geometry.location.lng()})">Get Directions</button>
-                                        <br><button onclick="toggleReviewForm('${highestRatedPlace.place_id}')">Leave a Review</button>
-                                        <div class="review-form" id="review-form-${highestRatedPlace.place_id}">
-                                            <textarea id="review-text-${highestRatedPlace.place_id}" placeholder="Write your review here..."></textarea>
-                                            <button onclick="submitReview('${highestRatedPlace.place_id}', '${highestRatedPlace.name}')">Submit Review</button>
-                                        </div>
-                                        <div class="review-container" id="review-container-${highestRatedPlace.place_id}">
-                                            <h4>Reviews:</h4>
-                                            <div id="reviews-${highestRatedPlace.place_id}"></div>
-                                        </div>
-                                    </div>
-                                `);
-                                infoWindow.open(map, highestRatedMarker);
-                            });
-                        }
-                    } else {
-                        console.error('Error fetching places:', status);
-                    }
+const websiteText = cafe.website
+    ? `<p><a href="${cafe.website}" target="_blank" rel="noopener">Visit website</a></p>`
+    : "";
+
+cafeCard.innerHTML = `
+    <h3>${cafe.name}</h3>
+    <p>${cafe.description}</p>
+    <p><strong>Address:</strong> ${cafe.address}</p>
+    <p><strong>Hours:</strong> ${cafe.hours}</p>
+    <p><strong>Phone:</strong> ${cafe.phone || "Not available"}</p>
+    <p class="cafe-rating">
+        <strong>Rating:</strong> ${cafe.rating} stars 
+        ${cafe.reviewCount ? `(${cafe.reviewCount} reviews)` : ""}
+    </p>
+    <p><strong>Price:</strong> ${priceText}</p>
+    ${distanceText}
+    ${websiteText}
+    <div class="cafe-tags">
+        ${cafe.tags.map(function (tag) {
+            return `<span>${tag}</span>`;
+        }).join("")}
+    </div>
+`;
+
+                    cafeResults.appendChild(cafeCard);
                 });
             }
 
-            function getDirections(lat, lng) {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        const origin = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        const destination = { lat: lat, lng: lng };
-
-                        const request = {
-                            origin: origin,
-                            destination: destination,
-                            travelMode: 'DRIVING'
-                        };
-
-                        directionsService.route(request, (result, status) => {
-                            if (status === 'OK') {
-                                directionsRenderer.setDirections(result);
-                            } else {
-                                console.error('Error fetching directions:', status);
-                            }
-                        });
-                    });
-                } else {
-                    alert('Geolocation is not supported by this browser.');
-                }
+            function updateCafeResults() {
+                const filteredCafes = getFilteredCafes();
+                renderCafes(filteredCafes);
             }
-
-            const keywords = ['Cafe', 'Coffee', 'Coffee Shop', 'innoNative Retail Store', 'streetwise Coffee', 'three sisters coffee van', 'columbus coffee', 'the bake house cafe', 'Café', 'dragonfruit cafe', 'jolt cafe', 'well cafe', 'totara cafe', 'wave cafe', 'acropolis cafe bar & grill',];
-            let minRating = 0;
-            const ratingFilter = document.getElementById('rating-filter');
-            ratingFilter.addEventListener('change', () => {
-                minRating = parseInt(ratingFilter.value, 10);
-                fetchFilteredPlaces();
-            });
-
-            function fetchFilteredPlaces() {
-                markers.forEach(marker => marker.setMap(null));
-                markers = [];
-                cafeCount = 0;
-                document.getElementById('cafe-count-number').textContent = cafeCount;
-
-                keywords.forEach(keyword => {
-                    fetchPlaces(whangareiLat, whangareiLng, keyword, minRating);
-                });
-            }
-
-            fetchFilteredPlaces();
-
-            const form = document.getElementById('contact-form');
-            const formError = document.getElementById('form-error');
-
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                if (form.checkValidity()) {
-                    formError.style.display = 'none';
-                    alert('Form submitted successfully!');
-                } else {
-                    formError.style.display = 'block';
-                }
-            });
-
-            const searchButton = document.getElementById('search-button');
-            searchButton.addEventListener('click', () => {
-                const query = document.getElementById('cafe-search').value.toLowerCase();
-                const matchedMarker = markers.find(marker => marker.place.name.toLowerCase().includes(query));
-                if (matchedMarker) {
-                    map.setCenter(matchedMarker.getPosition());
-                    map.setZoom(15);
-                    google.maps.event.trigger(matchedMarker, 'click');
-                } else {
-                    alert('Cafe not found. Please try another name.');
-                }
-            });
 
             function locateUser() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        const userLocation = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        map.setCenter(userLocation);
-                        map.setZoom(15);
-
-                        const userMarker = new google.maps.Marker({
-                            position: userLocation,
-                            map: map,
-                            title: "Your Location"
-                        });
-
-                        infoWindow.setContent("You are here!");
-                        infoWindow.open(map, userMarker);
-                    }, () => {
-                        alert('Location access denied. Please enable location to use this feature.');
-                    });
-                } else {
-                    alert('Geolocation is not supported by this browser.');
+                if (!navigator.geolocation) {
+                    cafeStatus.textContent =
+                        "Your browser does not support location. Showing all cafés instead.";
+                    return;
                 }
+
+                cafeStatus.textContent = "Finding your location...";
+
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        userLocation = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                        };
+
+                        cafeStatus.textContent =
+                            "Showing cafés nearest to your current location.";
+                        updateCafeResults();
+                    },
+                    function () {
+                        userLocation = null;
+                        cafeStatus.textContent =
+                            "Location permission was denied. Showing all cafés instead. You can still search by name, suburb, or tag.";
+                        updateCafeResults();
+                    }
+                );
             }
 
-            const locateButton = document.getElementById('locate-button');
-            locateButton.addEventListener('click', locateUser);
+            ratingFilter.addEventListener("change", updateCafeResults);
 
-            window.getDirections = getDirections;
-            window.toggleReviewForm = toggleReviewForm;
-            window.submitReview = submitReview;
+            searchInput.addEventListener("input", updateCafeResults);
+
+            searchButton.addEventListener("click", updateCafeResults);
+
+            locateButton.addEventListener("click", locateUser);
+
+            contactForm.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                if (contactForm.checkValidity()) {
+                    formError.style.display = "none";
+                    alert("Form submitted successfully!");
+                    contactForm.reset();
+                } else {
+                    formError.style.display = "block";
+                }
+            });
+
+            loadCafes();
         });
     </script>
+
     <script defer src="./main.js"></script>
 </body>
 </html>
