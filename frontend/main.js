@@ -1,8 +1,9 @@
-const cafeResults = document.querySelector("#cafeResults");
-const cafeStatus = document.querySelector("#cafeStatus");
-const useLocationBtn = document.querySelector("#useLocationBtn");
-const cafeSearchInput = document.querySelector("#cafeSearchInput");
-const ratingFilter = document.querySelector("#ratingFilter");
+const cafeResults = document.querySelector("#cafe-results");
+const cafeStatus = document.querySelector("#cafe-status");
+const cafeCountNumber = document.querySelector("#cafe-count-number");
+const useLocationBtn = document.querySelector("#locate-button");
+const cafeSearchInput = document.querySelector("#cafe-search");
+const ratingFilter = document.querySelector("#rating-filter");
 
 let cafes = [];
 let userLocation = null;
@@ -61,23 +62,8 @@ const setupSwiper = () => {
   });
 };
 
-const loadCafes = async () => {
-  try {
-    const response = await fetch("data/cafes.json");
-
-    if (!response.ok) {
-      throw new Error("Could not load café data.");
-    }
-
-    cafes = await response.json();
-    renderCafes(cafes);
-  } catch (error) {
-    if (cafeStatus) {
-      cafeStatus.textContent = "Sorry, café data could not be loaded.";
-    }
-
-    console.error(error);
-  }
+const degreesToRadians = (degrees) => {
+  return degrees * (Math.PI / 180);
 };
 
 const calculateDistanceKm = (userLat, userLng, cafeLat, cafeLng) => {
@@ -102,12 +88,28 @@ const calculateDistanceKm = (userLat, userLng, cafeLat, cafeLng) => {
   return earthRadiusKm * centralAngle;
 };
 
-const degreesToRadians = (degrees) => {
-  return degrees * (Math.PI / 180);
+const loadCafes = async () => {
+  try {
+    const response = await fetch("./data/cafes.json");
+
+    if (!response.ok) {
+      throw new Error("Could not load café data.");
+    }
+
+    cafes = await response.json();
+    filterCafes();
+  } catch (error) {
+    if (cafeStatus) {
+      cafeStatus.textContent =
+        "Sorry, café data could not be loaded. Check that frontend/data/cafes.json exists.";
+    }
+
+    console.error(error);
+  }
 };
 
 const getCafesWithDistance = () => {
-  if (!userLocation) return cafes;
+  if (!userLocation) return [...cafes];
 
   return cafes
     .map((cafe) => {
@@ -133,11 +135,16 @@ const filterCafes = () => {
   const cafesToFilter = getCafesWithDistance();
 
   const filteredCafes = cafesToFilter.filter((cafe) => {
-    const matchesSearch =
-      cafe.name.toLowerCase().includes(searchTerm) ||
-      cafe.address.toLowerCase().includes(searchTerm) ||
-      cafe.tags.join(" ").toLowerCase().includes(searchTerm);
+    const searchableText = `
+      ${cafe.name}
+      ${cafe.address}
+      ${cafe.suburb || ""}
+      ${cafe.city || ""}
+      ${cafe.description || ""}
+      ${cafe.tags ? cafe.tags.join(" ") : ""}
+    `.toLowerCase();
 
+    const matchesSearch = searchableText.includes(searchTerm);
     const matchesRating = cafe.rating >= minimumRating;
 
     return matchesSearch && matchesRating;
@@ -151,9 +158,13 @@ const renderCafes = (cafesToRender) => {
 
   cafeResults.innerHTML = "";
 
+  if (cafeCountNumber) {
+    cafeCountNumber.textContent = cafesToRender.length;
+  }
+
   if (cafesToRender.length === 0) {
     cafeResults.innerHTML = `
-      <article class="cafe-card">
+      <article class="cafe-details">
         <h3>No cafés found</h3>
         <p>Try a different search or lower the rating filter.</p>
       </article>
@@ -163,20 +174,39 @@ const renderCafes = (cafesToRender) => {
 
   cafesToRender.forEach((cafe) => {
     const cafeCard = document.createElement("article");
-    cafeCard.className = "cafe-card";
+    cafeCard.className = "cafe-details";
 
     const distanceText =
       typeof cafe.distance === "number"
-        ? `<p class="cafe-distance">${cafe.distance.toFixed(1)} km away</p>`
+        ? `<p class="cafe-distance"><strong>Distance:</strong> ${cafe.distance.toFixed(1)} km away</p>`
         : "";
+
+    const priceText =
+      typeof cafe.coffeePrice === "number"
+        ? `Flat white from NZ$${cafe.coffeePrice.toFixed(2)}`
+        : "Coffee price not verified";
+
+    const websiteText = cafe.website
+      ? `<p><a href="${cafe.website}" target="_blank" rel="noopener">Visit website</a></p>`
+      : "";
+
+    const tags = cafe.tags || [];
 
     cafeCard.innerHTML = `
       <h3>${cafe.name}</h3>
-      <p>${cafe.address}</p>
-      <p class="cafe-rating">Rating: ${cafe.rating} stars</p>
+      <p>${cafe.description || ""}</p>
+      <p><strong>Address:</strong> ${cafe.address}</p>
+      <p><strong>Hours:</strong> ${cafe.hours || "Hours not verified"}</p>
+      <p><strong>Phone:</strong> ${cafe.phone || "Not available"}</p>
+      <p class="cafe-rating">
+        <strong>Rating:</strong> ${cafe.rating} stars
+        ${cafe.reviewCount ? `(${cafe.reviewCount} reviews)` : ""}
+      </p>
+      <p><strong>Price:</strong> ${priceText}</p>
       ${distanceText}
+      ${websiteText}
       <div class="cafe-tags">
-        ${cafe.tags.map((tag) => `<span>${tag}</span>`).join("")}
+        ${tags.map((tag) => `<span>${tag}</span>`).join("")}
       </div>
     `;
 
@@ -188,7 +218,7 @@ const requestUserLocation = () => {
   if (!navigator.geolocation) {
     cafeStatus.textContent =
       "Your browser does not support location. Showing all cafés instead.";
-    renderCafes(cafes);
+    filterCafes();
     return;
   }
 
@@ -207,8 +237,8 @@ const requestUserLocation = () => {
     () => {
       userLocation = null;
       cafeStatus.textContent =
-        "Location permission was denied. You can still search by café name, suburb, or city.";
-      renderCafes(cafes);
+        "Location permission was blocked. Open the page with localhost or allow location in your browser settings.";
+      filterCafes();
     }
   );
 };
