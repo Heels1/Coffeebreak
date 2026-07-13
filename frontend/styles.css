@@ -935,24 +935,23 @@ smaller than 768px wide */
   }
 }
 .cafe-results {
-    max-width: 1200px;
-    margin: 35px auto 80px;
-    padding: 0 24px;
+    max-width: 1500px;
+    margin: 50px auto;
+    padding: 0 40px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 32px;
-    align-items: stretch;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 35px;
 }
 
-.cafe-details {
-    background-color: #fff;
-    color: rgb(78, 70, 70);
-    border-radius: 18px;
-    padding: 28px 26px;
-    border: none;
-    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.18);
-    text-align: left;
-    line-height: 1.55;
+.cafe-details{
+    background:#fff;
+    border-radius:18px;
+    padding:32px;
+    min-height:520px;
+    box-shadow:0 12px 30px rgba(0,0,0,.18);
+    display:flex;
+    flex-direction:column;
+    gap:14px;
 }
 
 .cafe-details h3 {
@@ -1009,4 +1008,75 @@ smaller than 768px wide */
     .cafe-details {
         padding: 24px 20px;
     }
+}
+.cafe-card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.cafe-card-header h3 {
+  margin: 0;
+  width: 100%;
+  line-height: 1.3;
+}
+
+.verification-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background-color: #e8f5e9;
+  color: #176b20;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.cafe-description {
+  margin-bottom: 1rem;
+  color: #5f5752;
+}
+
+.rating-source {
+  display: block;
+  margin-top: 0.2rem;
+  color: #706963;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.cafe-distance-unavailable {
+  color: #786f68;
+  font-size: 0.88rem;
+  font-weight: 400;
+}
+
+.cafe-details a {
+  color: green;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+#locate-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.cafe-details {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cafe-details * {
+  box-sizing: border-box;
+}
+
+.cafe-results {
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
 }
